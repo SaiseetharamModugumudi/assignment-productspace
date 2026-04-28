@@ -3,10 +3,27 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: './database.sqlite',
-  logging: false, // Set to console.log to see SQL queries
-});
+let sequelize;
+
+if (process.env.DATABASE_URL) {
+  // Render Postgres URL
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    },
+    logging: false
+  });
+} else {
+  // Local SQLite fallback
+  sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: './database.sqlite',
+    logging: false,
+  });
+}
 
 module.exports = sequelize;
